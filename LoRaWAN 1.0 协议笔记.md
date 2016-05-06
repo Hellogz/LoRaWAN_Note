@@ -1,4 +1,4 @@
-﻿# LoRaWAN 1.0 协议笔记
+# LoRaWAN 1.0 协议笔记
 
 标签（空格分隔）： 协议 
 
@@ -96,7 +96,7 @@ Major version of data message(Major bit field)
 包含一个帧头(**FHDR**)其次有一个可选的Port字段(**FPort**)和可选的帧Payload字段(**FRMPayload**)。
 
 - **Frame header(FHDR)**
-**FHDR**包含一个终端设备的4字节设备地址(**DevAddr**)，一个字节的帧控制(**FCtrl**)，一个两字节的帧计数(**FCnt**)，和最多15个字节的帧可选字段(**FOpts**)用来传输MAC命令。
+**FHDR**包含一个终端设备的4字节设备地址(**DevAddr**)，一个字节的帧控制(**FCtrl**)，一个两字节的帧计数(**FCnt**)，和最多15个字节的帧配置字段(**FOpts**)用来传输MAC命令。
 
 |Size(bytes)|4|1|2|0..15|
 |:-:|:-:|:-:|:-:|:-:|
@@ -143,4 +143,27 @@ The number of retransmissions (and their timing) for the same message where an a
 帧挂起位仅在downlink通讯中使用，说明网关有更多的数据等待被发送并且因此询问这个终端设备是否能发送另一个uplink消息尽可能快的打开另一个接收窗口。
 
 **帧计数(FCnt)**
-每个终端设备有两个帧计数器，一个用来记录发送到网络服务器的uplink(FCntUp),由终端增加FCntUp计数；另一个用来记录网络服务器发送给终端设备的downlink(FCntDown), 由网络服务器增加FCntDown计数。 网络服务器记录uplink帧计数并且生成downlink计数分别给每一个终端设备。入网激活成功后，终端设备的帧计数和网络服务器对应该终端设备的帧计数都将清零。之后FCntUp和FCntDown在数据帧发送的每个方向上以1每次递增。
+每个终端设备有两个帧计数器，一个用来记录发送到网络服务器的uplink(FCntUp),由终端增加FCntUp计数；另一个用来记录网络服务器发送给终端设备的downlink(FCntDown), 由网络服务器增加FCntDown计数。 网络服务器记录uplink帧计数并且生成downlink计数分别给每一个终端设备。入网激活成功后，终端设备的帧计数和网络服务器对应该终端设备的帧计数都将清零。之后FCntUp和FCntDown在数据帧发送的每个方向上以1每次递增。接收方这边相应的计数值与接收到的值同步，接收到的值是递增当前值并且
+
+**帧配置(FOptsLen in FCtrl, FOpts)**
+
+- FOpts的长度有FOptsLen决定。如果FOptsLen为0则FOpts字段将不存在，如果FOptsLen不为0，如果MAC命在FOpts字段，port 0在这时不能使用(这时的port必须是不为0或没有)。
+- MAC命令不能同时在payload字段和帧配置字段。
+
+**端口字段(FPort)**
+
+- 如果帧payload字段不为空，则端口字段必须存在。如果**FPort**值为0说明**FRMPayload**只包含MAC命令；**FPort**值为1..223(0x01..0xDF)时表示特殊应用。**FPort**值224..255(0xE0..0xFF)是为以后标准化应用扩展而保留的。
+
+|Size(bytes)|7..23|0..1|0..N|
+|:-:|:-:|:-:|:-:|
+|MACPayload|FHDR|FPort|FRMPayload|
+
+N必须小于或等于：N ≤ M - 1 - (**FHDR**长度) 这里的M是MAC payload的最大长度。单位：字节。
+
+**MAC帧Payload加密(FRMPayload)**
+
+- 如果数据帧携带有payload，**FRMPayload**必须在消息完整性代码(**MIC**)计算之前进行加密。
+- 加密方案使用的是IEEE 802.15.4/2006 Annex B[IEEE802154] 128位key的AES加密。
+- 默认是所有的FPort都由LoRaWAN层进行加密/解密。FPort为0时除外。
+
+
