@@ -55,7 +55,7 @@
 ### MAC Layer(PHYPayload)
 
 |Size(byte)|1|1..M|4|
-|-:|:-:|:-:|:-:|
+|:--:|:-:|:-:|:-:|
 |**PHPayload**|MHDR|MACPayload|MIC|
 
 M的最大值根据具体命令来决定。
@@ -63,10 +63,11 @@ M的最大值根据具体命令来决定。
 ###MAC Header(MHDR field)
 
 |Bit#|7..5|4..2|1..0|
-|-:|:-:|:-:|:-:|
+|:-:|:-:|:-:|:-:|
 |**MHDR bits**|MType|RFU|Major|
 
 Message type(MType bit filed)
+
 |MType|Description|
 |:-:|:-:|
 |000|Join Request|
@@ -85,6 +86,7 @@ Message type(MType bit filed)
 Data message用来传输MAC命令和应用数据，两种数据可以在一个Message中组合传输。confirmed-data message需要接收确认，而unconfirmed-data message不需要确认。Proprietary messages用来发送不标准的消息格式，不能与标准消息格式之间相互通信，但是能用于拥有专有扩展(Proprietary extensions)的设备之间进行通信。
 
 Major version of data message(Major bit field)
+
 |Major bits|Description|
 |:-:|:-:|
 |00|LoRaWAN R1|
@@ -95,18 +97,21 @@ Major version of data message(Major bit field)
 
 - **Frame header(FHDR)**
 **FHDR**包含一个终端设备的4字节设备地址(**DevAddr**)，一个字节的帧控制(**FCtrl**)，一个两字节的帧计数(**FCnt**)，和最多15个字节的帧可选字段(**FOpts**)用来传输MAC命令。
+
 |Size(bytes)|4|1|2|0..15|
-|-:|:-:|:-:|:-:|:-:|
+|:-:|:-:|:-:|:-:|:-:|
 |**FHDR**|DevAddr|FCtrl|FCnt|FOpts|
 
 downlink 帧时FCtrl在帧头的内容为：
+
 |Bit#|7|6|5|4|[3..0]|
-|-:|:-:|:-:|:-:|:-:|:-:|
+|:-:|:-:|:-:|:-:|:-:|:-:|
 |**FCtrl bits**|ADR|ADRACKReq|ACK|FPending|FOptsLen|
 
 uplink 帧时FCtrl在帧头的内容为：
+
 |Bit#|7|6|5|4|[3..0]|
-|-:|:-:|:-:|:-:|:-:|:-:|
+|:-:|:-:|:-:|:-:|:-:|:-:|
 |**FCtrl bits**|ADR|ADRACKReq|ACK|RFU|FOptsLen|
 
 **自适应数据速率(ADR)控制在帧头(ADR, ADRACKReq in FCtrl)**
