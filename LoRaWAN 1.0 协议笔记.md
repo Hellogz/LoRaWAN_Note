@@ -22,13 +22,13 @@
 *Uplink PHY structure:*
 
 |Preamble|PHDR|PHDR_CRC|PHYPayload|CRC|
-|--|
+|:-:|:-:|:-:|:-:|:-:|
 
 -**Downlink Message**: 服务器->网关->终端
 *Downlink PHY structure:*
 
 |Preamble|PHDR|PHDR_CRC|PHYPayload|
-|--|
+|:-:|:-:|:-:|:-:|
 
 ##Receive Window
 ###每一个uplink传输终端设备会打开两个短的接收窗口。
