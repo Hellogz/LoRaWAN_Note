@@ -20,11 +20,13 @@
 ##Physical Message Formats
 -**Uplink Messages**： 终端设备->网关(1 or More)->服务器
 *Uplink PHY structure:*
+
 |Preamble|PHDR|PHDR_CRC|PHYPayload|CRC|
 |--|
 
 -**Downlink Message**: 服务器->网关->终端
 *Downlink PHY structure:*
+
 |Preamble|PHDR|PHDR_CRC|PHYPayload|
 |--|
 
@@ -34,14 +36,17 @@
 
 ----------
 **PHYPayload:**
+
 |MHDR|MACPayload|MIC|
 |:-:|:-:|:-:|
 
 **MACPayload:**
+
 |FHDR|FPort|FRMPayload|
 |:-:|:-:|:-:|
 
 **FHDR:**
+
 |DevAddr|FCtrl|FCnt|FOpts|
 |:-:|:-:|:-:|
 
