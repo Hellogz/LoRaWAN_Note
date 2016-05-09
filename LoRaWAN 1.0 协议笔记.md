@@ -166,4 +166,164 @@ N必须小于或等于：N ≤ M - 1 - (**FHDR**长度) 这里的M是MAC payload
 - 加密方案使用的是IEEE 802.15.4/2006 Annex B[IEEE802154] 128位key的AES加密。
 - 默认是所有的FPort都由LoRaWAN层进行加密/解密。FPort为0时除外。
 
+##**MAC Commands**
 
+- 一个单一数据的帧能包含MAC命令的任何序列，或者捎带在**FOpts**字段里，当发送一个数据在**FRMPayload**字段的帧时，**FPort**字段要设置为0。发送数据**FOpts**字段带有MAC命令时，必须不加密和不超过15个字节长度。MCA命令在**FRMPayload**字段时，必须加密和不能超过**FRMPayload**字段最大限制长度。
+- MAC指令为了不被监听者破解，必须通过在一个单独的数据帧里的**FRMPayload**字段来发送MAC指令。
+
+MAC 命令表 **CID**看后八位。
+|CID|Command|End-device|Gateway|Short Description|
+|:-:|:-:|:-:|:-:|:-:|
+|0x02|**LinkCheckReq**|*| |终端设备验证是否连接到一个网络上。|
+|0x02|**LinkCheckAns**| |*|应答 LinkCheckReq 命令。|
+|0x03|**LinkADDRReq**| |*|请求改变终端设备的数据速率、发射功率、重复率或信道。|
+|0x03|**LinkADDRAns**|*| |应答 LinkADDRReq 命令。|
+|0x04|**DutyCycleReq**| |*|设置一个设备的最大总传输占空比。|
+|0x04|**DutyCycleAns**|*| |应答 DutyCycleReq 命令。|
+|0x05|**RXParamSetupReq**| |*|设置接收时隙参数。|
+|0x05|**RXParamSetupAns**|*| |应答 RXParameSetupReq 命令。|
+|0x06|**DevStatusReq**| |*|请求终端设备状态。|
+|0x06|**DevStatusAns**|*| |返回终端设备的电池电量和Demodulation margin(SNR)。|
+|0x07|**NewChannelReq**| |*|创建或修改一个Radio Channel的定义。|
+|0x07|**NewChannelAns**|*| |应答 NewChannelReq 命令。|
+|0x08|**RXTimingSetupReq**| |*|设置接收时隙的定时时间(Timing)？|
+|0x08|**RXTimingSetupAns**|*| |应答 RXTimingSetupReq 命令。|
+|0x80~0xFF|所有的(Proprietary)|\*|*|保留用于专有网络命令扩展。|
+
+
+- 任何服务器调整的值直到终端设备下一次Join时才会失效。因此，在每次成功的Join，设备都是使用默认参数，是否需要服务器重新调整参数，取决于需求。
+
+###**Link Check commands**(LinkCheckReq, LinkCheckAns)
+- ***LinkCheckReq*** 命令是终端设备用来验证是否连接上网，该命令没有payload。
+- 当 ***LinkCheckReq*** 命令被网络服务器收到，将通过一个或多个网关来响应一条 ***LinkCheckAns***命令。
+|Size(bytes)|1|1|
+|:-:|:-:|:-:|
+|LinkCheckAns Payload|Margin|GwCnt|
+
+
+- **Margin**(demodulation margin)为8位无符号整型，取值范围0～254，用来说明最后成功收到的 ***LinkCheckReq*** 命令的link margin 值，单位dB(幅度)。
+- **GwCnt** 是表示成功接收到最后的 ***LinkCheckReq*** 命令的网关数量。
+###**Link ADR command**(LinkADRReq, LinkADRAns)
+- ***LinkADRReq*** 命令是网络服务器请求一个终端设备执行速率适配。
+|Size(bytes)|1|2|1|
+|:-:|:-:|:-:|:-:|
+|LinkAddrReq Payload|DataRate_TXPower|ChMask|Redundancy|
+
+|Bits|[7:4]|[3:0]|
+|:-:|:-:|:-:|
+|DataRate_TXPower|DataRate|TXPower|
+
+
+- **ChMask**(channel mask)用于uplink接入的channel。
+- Channel state table:
+|Bit#|Usable channels|
+|:-:|:-:|
+|0|Channel 1|
+|1|Channel 2|
+|2|Channel 3|
+|...|...|
+|15|Channel 16|
+
+
+- 在**ChMask**字段的相应位设置为1表示相应的信道可以用于uplink传输。
+
+|Bits|7|[6:4]|[3:0]|
+|:-:|:-:|:-:|:-:|
+|Redundancy bits|RFU|ChMaskCntl|NbRep|
+
+
+- **NbRep** 表示每一次uplink消息重复次数。仅用于 unconfirmed uplink frames。默认值是1, 有效范围1～15，如果**NbRep**== 0，终端设备应该使用默认值1。每一次重复都是在接收窗口过期后，跳频也会在这期间进行。
+- The channel mask control(**ChMaskCntl**)field controls the interpretation of the previously defined **Chmask** bit mask. This field will only be non-zero values in networks where more than 16 channels are implemented. It controls the block of 16 channels to which the **ChMask** applies. It can also be used to globally turn on or off all channels using specific modulation. This field usage is region specific and is defined in Chapter 7.
+- 信道的频率是区域专用的在第6章中定义它们。一个终端设备用***LinkADRAns***命令来应答***LinkADRReq***命令。
+|Size(bytes)|1|
+|:-:|:-:|
+|LinkADRAns Payload|Status|
+
+|Bits|[7:3]|2|1|0|
+|:-:|:-:|:-:|:-:|:-:|
+|Status bits|RFU|Power ACK|Data rate ACK|Channel mask ACK|
+
+
+- ***LinkADRAns Status*** bits具有以下含义：
+| Field |Bit = 0|Bit = 1|
+|:-:|:-:|:-:|
+|Channel mask ACK|发送的Channel mask使能一个尚未定义的channel，该命令被丢弃并且终端设备的状态没有改变。|发送的Channel mask成功解析，当前所有定义的channel状态根据channel mask来设置。|
+|Data rate ACK|请求的数据率是终端设备未知的或任何使能的channel不被支持。该命令被丢弃并且终端设备的状态没有改变。|数据率成功设置。|
+|Power ACK|请求的功率级别在终端设备中没有实现。该命令被丢弃并且终端设备的状态没有改变。|功率级别成功设置。|
+
+
+- 如果这3个字段中的任何一个为0，则该命令没有设置成功，节点一直保持以前的状态。
+###**End-Device Transmit Duty Cycle**(DutyCycleReq, DutyCycleAns)
+- 该DutyCycleReq命令通过网络协调器来限制一个终端设备的最大总发射占空比。总发射占空比对应于发射占空比所有子频段。
+|Size(bytes)|1|
+|:-:|:-:|
+|DutyCycleReq Payload|MaxDCycle|
+
+允许的最大终端设备发送占空比:  aggregated duty cycle = $\frac{1}{2^{MaxDCycle}}$  
+
+- **MaxDutyCycle**的有效值是[0：15]。除了为0则占空比没有限制，其他则由区域设置调节(Regional regulation)。
+- 值255意味着终端设备应立即变得沉默(silent)。相等于远程切断终端设备。
+- 终端设备使用 ***DutyCycleAns*** 来应答 ***DutyCycleReq*** 命令。***DutyCycleAns*** 不含任何Payload。
+
+###**Receive Window Parameters**(RXParamSetupReq, RXParamSetupAns)
+- ***RXParamSetupReq***命令允许修改每一个uplink之后的第二接收窗口(RX2)的频率和数据率。该命令还允许uplink和RX1时隙downlink数据速率之间的offset修改
+
+|Size(bytes)|1|3|
+|:-:|:-:|:-:|
+|RX2SetupReq Payload|DLsettings|Frequency|
+
+|Bits|7|6:4|3:0|
+|:-:|:-:|:-:|:-:|
+|DLsettings|RFU|RX1DRoffset|RX2DataRate|
+
+
+- Rx1DRoffset字段设置的offset在uplink数据率和RX1时隙downlink数据速率之间偏移。作为默认此偏移为0。该偏移是用于考虑到最大功率密度约束在某些区域的基站和以平衡上行链路和下行链路的无线电链路余量。
+- 数据速率（RX2DataRate）字段定义了使用第二接收窗为LinkADRReq命令相同的约定下列下行链路的数据速率（例如：0意味着，DR0/125kHz）。频率(**Frequency**)字段用于第二接收窗口的信道频率，因此这个频率是在***NewChannelReq***命令定义的约定下。
+- ***RXParamSetupAns***命令是用来确认***RXParamSetupReq***命令的接收的。payload只有一个字节的status：
+|Size(bytes)|1|
+|:-:|:-:|
+|RX2SetupAns Payload|Status|
+
+|Bits|7:3|2|1|0|
+|:-:|:-:|:-:|:-:|:-:|
+|Status bits|RFU|RX1DRoffset ACK|RX2 Data rate ACK|Channel ACK|
+
+|Field|Bit = 0|Bit = 1|
+|:-:|:-:|:-:|
+|Channel ACK|请求的频率终端设备不可用。|RX2 时隙信道设置成功。|
+|RX2 Data rate ACK|请求的数据速率终端设备未知。|RX2 时隙数据速率设置成功。|
+|RX1DRoffset ACK|uplink/downlink数据速率偏移不在RX1时隙允许的范围里。|RX1DRoffset设置成功。|
+
+
+- 如果这3个字段中的任何一个为0，则该命令没有设置成功，保持之前的参数。
+
+###**End-Device Status**(DevStatusReq, DevStatusAns)
+- 通过***DevStatusReq***命令向一个终端设备请求状态信息。该命令没有Payload。如果***DevStatusReq***命令的接收者是一个终端设备，终端设备需用***DevStatusAns***命令来响应。
+
+|Size(bytes)|1|1|
+|:-:|:-:|:-:|
+|DevStatusAns Payload|Battery|Margin|
+
+电池电量等级编码如下：
+|Battery|Description|
+|:-:|:-:|
+|0|终端设备连技到外部电源。|
+|1..254|电量等级，1处于最低电量，254处于最高电量。|
+|255|终端设备无法测量电量等级|
+
+
+- **Margin**是最后成功收到***DevStatusReq***命令经过四舍五入到最接近整数值的解调信噪比(SNR)。该值取有符号整型的6位来表示，最小值为-32，最大值为31.
+|Bits|7:6|5:0|
+|:-:|:-:|:-:|
+|Status|RFU|Margin|
+
+
+###**Creation / Modification of a Channel**(NewChannelReq, NewChannelAns)
+-***NewChannelReq*** 命令可以用于修改现有信道的参数或者创建一个新的。该命令用于设置这个频道上可用的新的信道的中心频率和数据率的范围：
+|Size(bytes)|1|3|1|
+|:-:|:-:|:-:|:-:|
+|NewChannelReq Payload|ChIndex|Freq|DrRange|
+
+
+- 信道索引(**ChIndex**)是正在创建或修改的信道的索引值。根据所使用的区域和频带，该LoRaWAN规范规定默认频道必须是共同的所有的设备和不能被 ***NewChannelReq*** 命令（参照第6章）进行修改。如果缺省信道的数目是N，则缺省信道从0到N-1，并且 **ChIndex** 合适的范围是N至15.一种设备必须能够处理至少16个不同的信道的定义。在某些区域中的设备可具有存储16个以上的信道的定义。
+- 频率(**Freq**)字段是一个24位无符号整数。
