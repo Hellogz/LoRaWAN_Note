@@ -4,20 +4,22 @@
 
 ---
 
-##终端设备需要遵守的约定：
+##**终端设备需要遵守的约定**：
 - 终端设备在每一次数据传输中通过伪随机数的方式来改变信道。这个得到的通信频率使系统在干扰的情况下更稳定。
 - 终端设备遵循在当地法规允许的子频段中最大传输占空比。
 - 终端设备遵循在当地法规允许的子频段中最大传输持续时间或停滞时间。
 
 ----------
-##LoRaWAN Classes：
+##**LoRaWAN Classes**：
 - **Class A** 双向终端设备：支持Class A的终端设备在双向传输中每一次终端设备uplink传输后会有两个短的downlink接收窗口。这个传输时间间隙通过终端设备基于自身传输需要一个随机时间基础上微小的变化确定(**ALOHA**型协议)。Class A是为超低功耗终端设备系统只需要终端发送了一次uplink传输后服务器马上downlink传输的应用。来自服务器的任何downlink通信必须等到下一次计划的uplink。
 - **Class B** 绑定接收时隙的双向终端设备：支持 Class B的终端设备拥有更多的接收时隙。在Class A随机接收窗口上增加，Class B设备在计划时间里打开额外的接收窗口。来自gateway的指令让终端设备在计划时间里打开接收窗口接收时间同步信标(time synchronized Beacon)。这样能让服务器知道终端设备在监听中。
 - **Class C** 拥有最大接收时隙的双向终端设备：支持Class C的终端设备有一个几乎一直开启接收的窗口，只有传输中的时候才关闭。对比Class A或Class B终端设备将使用更多的电量来运行Class C，但是服务器到终端设备的通信Class C提供最低的延迟。
 
 **更高的类别支持低类别的所有功能。所有支持LoRaWAN的终端设备都必须支持Class A**
+
 ----------
-##Physical Message Formats
+
+##**Physical Message Formats**
 -**Uplink Messages**： 终端设备->网关(1 or More)->服务器
 *Uplink PHY structure:*
 
@@ -35,6 +37,7 @@
 
 
 ----------
+
 **PHYPayload:**
 
 |MHDR|MACPayload|MIC|
@@ -52,7 +55,7 @@
 
 
 ----------
-### MAC Layer(PHYPayload)
+###**MAC Layer(PHYPayload)**
 
 |Size(byte)|1|1..M|4|
 |:--:|:-:|:-:|:-:|
@@ -165,6 +168,10 @@ N必须小于或等于：N ≤ M - 1 - (**FHDR**长度) 这里的M是MAC payload
 - 如果数据帧携带有payload，**FRMPayload**必须在消息完整性代码(**MIC**)计算之前进行加密。
 - 加密方案使用的是IEEE 802.15.4/2006 Annex B[IEEE802154] 128位key的AES加密。
 - 默认是所有的FPort都由LoRaWAN层进行加密/解密。FPort为0时除外。
+
+
+----------
+
 
 ##**MAC Commands**
 
@@ -319,11 +326,155 @@ MAC 命令表 **CID**看后八位。
 
 
 ###**Creation / Modification of a Channel**(NewChannelReq, NewChannelAns)
--***NewChannelReq*** 命令可以用于修改现有信道的参数或者创建一个新的。该命令用于设置这个频道上可用的新的信道的中心频率和数据率的范围：
+- ***NewChannelReq*** 命令可以用于修改现有信道的参数或者创建一个新的。该命令用于设置这个频道上可用的新的信道的中心频率和数据率的范围：
 |Size(bytes)|1|3|1|
 |:-:|:-:|:-:|:-:|
 |NewChannelReq Payload|ChIndex|Freq|DrRange|
 
 
 - 信道索引(**ChIndex**)是正在创建或修改的信道的索引值。根据所使用的区域和频带，该LoRaWAN规范规定默认频道必须是共同的所有的设备和不能被 ***NewChannelReq*** 命令（参照第6章）进行修改。如果缺省信道的数目是N，则缺省信道从0到N-1，并且 **ChIndex** 合适的范围是N至15.一种设备必须能够处理至少16个不同的信道的定义。在某些区域中的设备可具有存储16个以上的信道的定义。
-- 频率(**Freq**)字段是一个24位无符号整数。
+- 频率(**Freq**)字段是一个24位无符号整数。这个实际信道频率为100 × **Freq** Hz，由此表示低于100 MHz的频率值被保留供将来使用。这使得在任何信道设置频率在100MHz至1.67GHz之间每100Hz为一个步进。信道的 **Freq** 值不能为0。终端设备能否检查它的实际频率由无线硬件决定否则将返回一个错误。
+- 数据速率范围(**DrRange**)字段指定此通道允许的数据速率范围。该字段由两个4位的索引组成：
+|Bits|7:4|3:0|
+|:-:|:-:|:-:|
+|DrRange|MaxDR|MinDR|
+
+
+- 继第5.2节的最低数据速率(**MinDR**)子定义的约定指定了该信道上的最低数据速率。举个例子：0 指定 DR0 / 125kHz。类似地，最大数据速率(**MaxDR**)指定了最高数据速率。举个例子：DrRange = 0x77 意味着信道上只有50kbps的GFSK是允许的，DrRange = 0x50 意味着能支持的数据速率范围是 DR0 / 125kHz ~ DR5 / 125kHz。
+- 新定义的信道被使能，则可以立即使用该信道。
+- 终端设备通过发送回一个 ***NewChannelAns*** 命令确认***NewChannelAns*** 命令的接收。此消息的有效载荷包含以下信息：
+|Size(bytes)|1|
+|:-:|:-:|
+|NewChannelAns Payload|Status|
+
+|Bits|7:2|1|0|
+|:-:|:-:|:-:|:-:|
+|Status|RFU|Data rate range ok|Channel frequency ok|
+
+|Field|Bit = 0|Bit = 1|
+|:-:|:-:|:-:|
+|Data rate range ok|指定的数据速率范围超出目前为此设备定义的那些。|数据速率的范围可能与终端设备的兼容。|
+|Channel frequency ok|这个频率设备无法使用。|这个频率设备能够使用。|
+
+
+- 如果这2个位中的任何一个为0，则该命令没有成功，新的信道没有创建。
+
+###**Setting delay between TX and RX**(RXTimingSetupReq, RXTimingSetupAns)
+- ***RXTimingSetupReq*** 命令允许配置 TX uplink 和 打开第一接收窗口时隙间的延迟(Delay)。在第一接收窗口时隙打开一秒之后第二接收窗口时隙才打开。
+|Size(bytes)|1|
+|:-:|:-:|
+|RXTimingSetupReq Payload|Settings|
+
+
+- 延迟(**Delay**)字段指定延迟时间。该字段被分割在两个4位的索引：
+|Bits|7:4|3:0|
+|:-:|:-:|:-:|
+|Settings|RFU|Del|
+
+
+- 延迟(Delay)以秒为单位。**Del** 为 0 对应为 1 秒。
+|Del|Delay[s]|
+|:-:|:-:|
+|0|1|
+|1|1|
+|2|2|
+|3|3|
+|...|...|
+|15|15|
+
+
+- 一个终端设备用 ***RXTimingSetupAns*** 来应答 ***RXTimingSetupReq*** 命令,***RXTimingSetupAns***命令没有payload。
+
+
+----------
+
+##**End-Device Activation**
+
+- 要加入到 LoRaWAN 网络中来，每一个终端设备必须 personalized(个性化)和激活(activated)。
+- 一个终端设备的激活可以通过两种方式来实现，无论是当一个终端设备被部署或复位后通过 **Over-The-Air Activation** （OTAA），或通过 **Activation By Personalization** (激活由个性化)（ABP），其中终端设备的个性化和激活的两个步骤为一个步骤完成。
+
+###**Data Stored in the End-device after Activation**
+- 激活后，将下面的信息存储在终端设备里：一个设备地址(**DevAddr**)，一个应用标识符(**AppEUI**)，一个网络会话密钥(**NwkSKey**)，和一个应用会话密钥(**AppSKey**)。
+
+###**End-device address(DevAddr)**
+- 当前网络内的终端设备的32位标识码就是设备的 **DevAddr** 。格式如下：
+|Bit#|31:25|24:0|
+|:-:|:-:|:-:|
+|DevAddr bits|NwkID|NwkAddr|
+
+
+- 最有用的7位是网络标识符(**NwkID**)用于区分不同地区范围的网络运营商的网络地址，以纠正漫游的问题。另外25位为终端设备的网络地址(**NwkAddr**)，可以由任意的网络管理器分配。
+
+###**Application identifier(AppEUI)**
+- **AppEUI** 是在IEEE EUI64地址范围唯一标识终端设备的应用程序提供商的全球应用ID。
+- 在激活过程之前这个 **AppEUI** 就存储在终端设备中了。
+
+###**Network session key(NwkSKey)**
+- **NwkSKey** 是一个 网络会话密钥，指定用于终端设备。它是用于网络服务器和终端设备来计算和验证所有数据消息的 **MIC**（消息完整性代码），以确保数据的完整性。它还用于加密和解密仅数据消息的MAC payload。
+
+###**Application session key(AppSKey)**
+- **AppSKey** 是一个应用会话密钥，指定用于终端设备。它用于由网络服务器和终端设备都进行加密和解密应用程序特定数据的消息的payload字段。它还用来计算和验证可以包括在应用程序特定数据的消息的Payload的应用程序级的MIC。
+
+###**Over-the-Air Activation**
+- 用于空中激活，终端设备必须遵循Join步骤才能与网络服务器进行数据交换。每当终端设备丢失了网络连接，必须重新Join网络。
+- 在Join之前以下信息需要设置：全球唯一终端设备标识符(**DevEUI**)，程序标识符(**AppEUI**)，一个AES-128密钥(**AppKey**)。
+- 使用空中激活时，终端设备不用设置任何形式的网络密钥。相反，当一个终端设备加入网络，网络会话密钥将用于加密和验证网络级的传输。这种方式便于不同的供应商的网络之间的终端设备漫游。同时使用网络会话密钥和应用会话密钥还允许在其中应用的数据不能由网络提供商来读取或篡改联合网络服务器。
+
+###**End-device identifier(DevEUI)**
+- **DevEUI** 是终端设备在IEEE EUI64地址空间的全球终端设备ID唯一标识。
+
+###**Application key(AppKey)**
+- **AppKey** 用于生成 NwkSKey 和 AppSKey。
+
+###**Join procedure**
+- 对于终端设备，Join 过程包括 **Join request** 和 **Join accept** 两个过程与服务器的MAC消息交互。
+
+###**Join-request message**
+- Join 过程总是从终端设备发起join-request请求开始。
+|Size(bytes)|8|8|2|
+|:-:|:-:|:-:|:-:|
+|Join Request|AppEUI|DevEUI|DevNonce|
+
+
+- **DevNonce** 是一个随机值。对于每一个终端设备，网络服务器跟踪终端设备过去使用的一定数量的**DevNonce** 和忽略来自终端设备join请求时的**DevNonce**。
+- 这种使用随机数的机制能防止重复发送被记录的join请求消息的攻击。
+- Join消息的**MIC**计算方法：
+*cmac* = aes128_cmac(AppKey, MHDR|AppEUI|DevEUI|DevNonce)
+MIC = *cmac*[0..3]
+- **Join-request消息没有加密**。
+
+###**Join-accept message**
+- 如果**Join-request**被允许，将发送**Join-accept**来应答。Join-accept消息像普通的downlink消息一样但是使用的延迟是JOIN_ACCEPT_DELAY1 和 JOIN_ACCEPT_DELAY2。Join-accept使用的频率和数据速率和RX1、RX2的相同。
+- 如果Join-request没有响应，表明不允许加入该网络。
+|Size(bytes)|3|3|4|1|1|(16)Optional|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|Join Accept|AppNonce|NetID|DevAddr|DLSettings|RxDelay|CFList|
+
+
+- **AppNonce** 是一个随机数或由网络服务器提供的唯一ID，和用于终端设备来生成**NwkSKey** 和 **AppSKey** :
+NwkSKey = aes128_encrypt(AppKey, 0x01|AppNonce|NetID|DevNonce|$pad_{16}$)
+AppSKey = aes128_encrypt(AppKey, 0x02|AppNonce|NetID|DevNonce|$pad_{16}$)
+- MIC计算：
+*cmac* = aes128_cmac(AppKey, MHDR|AppNonce|NetID|DevAddr|RFU|RxDelay|CFList)
+MIC = *cmac*[0..3]
+- Join-accept 消息使用**AppKey**加密：
+aes128_decrypt(AppKey, AppNonce|NetID|DevAddr|RFU|RxDelay|CFList|MIC)
+- 网络服务器使用ECB模式的AES解密操作来加密Join-accept消息，所以终端设备可以使用AES加密运算来解密该消息。这样终端设备只需要实现AES加密而不不需要实现AES解密。
+- 使用这两个会话密钥，使得网络运营商无法窃取应用数据，这样的话，在网络上应用程序提供者必须支持终端设备在加入网络的过程中创建用于终端设备的NwkSKey。与此同时应用提供者承诺给网络运营商因终端设备产生的任何流量费用和保留用于保护其应用数据的AppSKey的完全控制。
+- **NetID**的格式如下：七位LSB为NwkID，七位MSB为用于终端设备的短地址。相邻或重叠的网络必须有不同的**NwkID**。剩下的17个MSB由网络运营商自由选择。原文： the format of the NetID is as follows: The seven LSB of the NetID are called NwkID and match the seven MSB of the short address of an end-device as described before. Neighboring or overlapping networks must have different NwkIDs. the remaining 17 MSB can be freely chosen by the network operator.
+- DLsetting字段包含downlink配置：
+|Bits|7|6:4|3:0|
+|:-:|:-:|:-:|:-:|
+|DLsettings|RFU|RX1DRoffset|RX2 Data rate|
+
+
+- RX1DRoffset 字段设置在终端设备的第一接收时隙通讯时的uplink数据速率和downlink数据速率之间offset。默认情况该offset为0。downlink数据速率总是低于或等于uplink数据速率。这个offset用于约束某些区域的基站最大功率密度和平衡uplink与downlink的radio link margins（余量）。
+- uplink和downlink数据速率之间的实际关系和具体区域有关。
+- **RxDelay** 延迟遵循**RXTimingSetupReq**命令中的**Delay**字段一样的延迟约定。
+
+###**Activation by Personalization**
+- 某些情况下，终端设备可以由Personalization（个性化）激活。终端设备通过Personalization绕过 **Join-request Join-accept** 过程来加入特定的网络。
+- 使用Personalization激活一个终端设备，意味着 **DevAddr**、**NwkSKey**和**AppSKey**直接存储在终端设备里替换OTA激活的**DevEUI**、**AppEUI**和**AppKey**。终端设备配置了开始加入一个特定的LoRa网络时所需的信息。
+- 每一个设备必须有唯一的NwkSKey和AppSKey。这样一个设备的密钥被破解了也不会造成其他设备的安全性危险。创建密钥过程不应该被公开(比如节点地址)。
+
+##**Physical Layer**
