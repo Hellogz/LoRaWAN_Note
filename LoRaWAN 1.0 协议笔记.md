@@ -179,6 +179,7 @@ N必须小于或等于：N ≤ M - 1 - (**FHDR**长度) 这里的M是MAC payload
 - MAC指令为了不被监听者破解，必须通过在一个单独的数据帧里的**FRMPayload**字段来发送MAC指令。
 
 MAC 命令表 **CID**看后八位。
+
 |CID|Command|End-device|Gateway|Short Description|
 |:-:|:-:|:-:|:-:|:-:|
 |0x02|**LinkCheckReq**|*| |终端设备验证是否连接到一个网络上。|
@@ -203,6 +204,7 @@ MAC 命令表 **CID**看后八位。
 ###**Link Check commands**(LinkCheckReq, LinkCheckAns)
 - ***LinkCheckReq*** 命令是终端设备用来验证是否连接上网，该命令没有payload。
 - 当 ***LinkCheckReq*** 命令被网络服务器收到，将通过一个或多个网关来响应一条 ***LinkCheckAns***命令。
+
 |Size(bytes)|1|1|
 |:-:|:-:|:-:|
 |LinkCheckAns Payload|Margin|GwCnt|
@@ -212,6 +214,7 @@ MAC 命令表 **CID**看后八位。
 - **GwCnt** 是表示成功接收到最后的 ***LinkCheckReq*** 命令的网关数量。
 ###**Link ADR command**(LinkADRReq, LinkADRAns)
 - ***LinkADRReq*** 命令是网络服务器请求一个终端设备执行速率适配。
+
 |Size(bytes)|1|2|1|
 |:-:|:-:|:-:|:-:|
 |LinkAddrReq Payload|DataRate_TXPower|ChMask|Redundancy|
@@ -223,6 +226,7 @@ MAC 命令表 **CID**看后八位。
 
 - **ChMask**(channel mask)用于uplink接入的channel。
 - Channel state table:
+
 |Bit#|Usable channels|
 |:-:|:-:|
 |0|Channel 1|
@@ -242,6 +246,7 @@ MAC 命令表 **CID**看后八位。
 - **NbRep** 表示每一次uplink消息重复次数。仅用于 unconfirmed uplink frames。默认值是1, 有效范围1～15，如果**NbRep**== 0，终端设备应该使用默认值1。每一次重复都是在接收窗口过期后，跳频也会在这期间进行。
 - The channel mask control(**ChMaskCntl**)field controls the interpretation of the previously defined **Chmask** bit mask. This field will only be non-zero values in networks where more than 16 channels are implemented. It controls the block of 16 channels to which the **ChMask** applies. It can also be used to globally turn on or off all channels using specific modulation. This field usage is region specific and is defined in Chapter 7.
 - 信道的频率是区域专用的在第6章中定义它们。一个终端设备用***LinkADRAns***命令来应答***LinkADRReq***命令。
+
 |Size(bytes)|1|
 |:-:|:-:|
 |LinkADRAns Payload|Status|
@@ -252,6 +257,7 @@ MAC 命令表 **CID**看后八位。
 
 
 - ***LinkADRAns Status*** bits具有以下含义：
+
 | Field |Bit = 0|Bit = 1|
 |:-:|:-:|:-:|
 |Channel mask ACK|发送的Channel mask使能一个尚未定义的channel，该命令被丢弃并且终端设备的状态没有改变。|发送的Channel mask成功解析，当前所有定义的channel状态根据channel mask来设置。|
@@ -262,6 +268,7 @@ MAC 命令表 **CID**看后八位。
 - 如果这3个字段中的任何一个为0，则该命令没有设置成功，节点一直保持以前的状态。
 ###**End-Device Transmit Duty Cycle**(DutyCycleReq, DutyCycleAns)
 - 该DutyCycleReq命令通过网络协调器来限制一个终端设备的最大总发射占空比。总发射占空比对应于发射占空比所有子频段。
+
 |Size(bytes)|1|
 |:-:|:-:|
 |DutyCycleReq Payload|MaxDCycle|
@@ -287,6 +294,7 @@ MAC 命令表 **CID**看后八位。
 - Rx1DRoffset字段设置的offset在uplink数据率和RX1时隙downlink数据速率之间偏移。作为默认此偏移为0。该偏移是用于考虑到最大功率密度约束在某些区域的基站和以平衡上行链路和下行链路的无线电链路余量。
 - 数据速率（RX2DataRate）字段定义了使用第二接收窗为LinkADRReq命令相同的约定下列下行链路的数据速率（例如：0意味着，DR0/125kHz）。频率(**Frequency**)字段用于第二接收窗口的信道频率，因此这个频率是在***NewChannelReq***命令定义的约定下。
 - ***RXParamSetupAns***命令是用来确认***RXParamSetupReq***命令的接收的。payload只有一个字节的status：
+
 |Size(bytes)|1|
 |:-:|:-:|
 |RX2SetupAns Payload|Status|
@@ -312,6 +320,7 @@ MAC 命令表 **CID**看后八位。
 |DevStatusAns Payload|Battery|Margin|
 
 电池电量等级编码如下：
+
 |Battery|Description|
 |:-:|:-:|
 |0|终端设备连技到外部电源。|
@@ -320,6 +329,7 @@ MAC 命令表 **CID**看后八位。
 
 
 - **Margin**是最后成功收到***DevStatusReq***命令经过四舍五入到最接近整数值的解调信噪比(SNR)。该值取有符号整型的6位来表示，最小值为-32，最大值为31.
+
 |Bits|7:6|5:0|
 |:-:|:-:|:-:|
 |Status|RFU|Margin|
@@ -327,6 +337,7 @@ MAC 命令表 **CID**看后八位。
 
 ###**Creation / Modification of a Channel**(NewChannelReq, NewChannelAns)
 - ***NewChannelReq*** 命令可以用于修改现有信道的参数或者创建一个新的。该命令用于设置这个频道上可用的新的信道的中心频率和数据率的范围：
+
 |Size(bytes)|1|3|1|
 |:-:|:-:|:-:|:-:|
 |NewChannelReq Payload|ChIndex|Freq|DrRange|
@@ -335,6 +346,7 @@ MAC 命令表 **CID**看后八位。
 - 信道索引(**ChIndex**)是正在创建或修改的信道的索引值。根据所使用的区域和频带，该LoRaWAN规范规定默认频道必须是共同的所有的设备和不能被 ***NewChannelReq*** 命令（参照第6章）进行修改。如果缺省信道的数目是N，则缺省信道从0到N-1，并且 **ChIndex** 合适的范围是N至15.一种设备必须能够处理至少16个不同的信道的定义。在某些区域中的设备可具有存储16个以上的信道的定义。
 - 频率(**Freq**)字段是一个24位无符号整数。这个实际信道频率为100 × **Freq** Hz，由此表示低于100 MHz的频率值被保留供将来使用。这使得在任何信道设置频率在100MHz至1.67GHz之间每100Hz为一个步进。信道的 **Freq** 值不能为0。终端设备能否检查它的实际频率由无线硬件决定否则将返回一个错误。
 - 数据速率范围(**DrRange**)字段指定此通道允许的数据速率范围。该字段由两个4位的索引组成：
+
 |Bits|7:4|3:0|
 |:-:|:-:|:-:|
 |DrRange|MaxDR|MinDR|
@@ -343,6 +355,7 @@ MAC 命令表 **CID**看后八位。
 - 继第5.2节的最低数据速率(**MinDR**)子定义的约定指定了该信道上的最低数据速率。举个例子：0 指定 DR0 / 125kHz。类似地，最大数据速率(**MaxDR**)指定了最高数据速率。举个例子：DrRange = 0x77 意味着信道上只有50kbps的GFSK是允许的，DrRange = 0x50 意味着能支持的数据速率范围是 DR0 / 125kHz ~ DR5 / 125kHz。
 - 新定义的信道被使能，则可以立即使用该信道。
 - 终端设备通过发送回一个 ***NewChannelAns*** 命令确认***NewChannelAns*** 命令的接收。此消息的有效载荷包含以下信息：
+
 |Size(bytes)|1|
 |:-:|:-:|
 |NewChannelAns Payload|Status|
@@ -361,18 +374,21 @@ MAC 命令表 **CID**看后八位。
 
 ###**Setting delay between TX and RX**(RXTimingSetupReq, RXTimingSetupAns)
 - ***RXTimingSetupReq*** 命令允许配置 TX uplink 和 打开第一接收窗口时隙间的延迟(Delay)。在第一接收窗口时隙打开一秒之后第二接收窗口时隙才打开。
+
 |Size(bytes)|1|
 |:-:|:-:|
 |RXTimingSetupReq Payload|Settings|
 
 
 - 延迟(**Delay**)字段指定延迟时间。该字段被分割在两个4位的索引：
+
 |Bits|7:4|3:0|
 |:-:|:-:|:-:|
 |Settings|RFU|Del|
 
 
 - 延迟(Delay)以秒为单位。**Del** 为 0 对应为 1 秒。
+
 |Del|Delay[s]|
 |:-:|:-:|
 |0|1|
@@ -398,6 +414,7 @@ MAC 命令表 **CID**看后八位。
 
 ###**End-device address(DevAddr)**
 - 当前网络内的终端设备的32位标识码就是设备的 **DevAddr** 。格式如下：
+
 |Bit#|31:25|24:0|
 |:-:|:-:|:-:|
 |DevAddr bits|NwkID|NwkAddr|
@@ -431,6 +448,7 @@ MAC 命令表 **CID**看后八位。
 
 ###**Join-request message**
 - Join 过程总是从终端设备发起join-request请求开始。
+
 |Size(bytes)|8|8|2|
 |:-:|:-:|:-:|:-:|
 |Join Request|AppEUI|DevEUI|DevNonce|
@@ -446,6 +464,7 @@ MIC = *cmac*[0..3]
 ###**Join-accept message**
 - 如果**Join-request**被允许，将发送**Join-accept**来应答。Join-accept消息像普通的downlink消息一样但是使用的延迟是JOIN_ACCEPT_DELAY1 和 JOIN_ACCEPT_DELAY2。Join-accept使用的频率和数据速率和RX1、RX2的相同。
 - 如果Join-request没有响应，表明不允许加入该网络。
+
 |Size(bytes)|3|3|4|1|1|(16)Optional|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |Join Accept|AppNonce|NetID|DevAddr|DLSettings|RxDelay|CFList|
@@ -463,6 +482,7 @@ aes128_decrypt(AppKey, AppNonce|NetID|DevAddr|RFU|RxDelay|CFList|MIC)
 - 使用这两个会话密钥，使得网络运营商无法窃取应用数据，这样的话，在网络上应用程序提供者必须支持终端设备在加入网络的过程中创建用于终端设备的NwkSKey。与此同时应用提供者承诺给网络运营商因终端设备产生的任何流量费用和保留用于保护其应用数据的AppSKey的完全控制。
 - **NetID**的格式如下：七位LSB为NwkID，七位MSB为用于终端设备的短地址。相邻或重叠的网络必须有不同的**NwkID**。剩下的17个MSB由网络运营商自由选择。原文： the format of the NetID is as follows: The seven LSB of the NetID are called NwkID and match the seven MSB of the short address of an end-device as described before. Neighboring or overlapping networks must have different NwkIDs. the remaining 17 MSB can be freely chosen by the network operator.
 - DLsetting字段包含downlink配置：
+
 |Bits|7|6:4|3:0|
 |:-:|:-:|:-:|:-:|
 |DLsettings|RFU|RX1DRoffset|RX2 Data rate|
