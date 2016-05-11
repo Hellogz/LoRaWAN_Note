@@ -20,25 +20,33 @@
 ----------
 
 ##**Physical Message Formats**
-- **Uplink Messages**： 终端设备->网关(1 or More)->服务器
-*Uplink PHY structure:*
+###**Uplink Messages**： 终端设备->网关(1 or More)->服务器
+***Uplink PHY structure:***
 
 
 |Preamble|PHDR|PHDR_CRC|PHYPayload|CRC|
 |:-:|:-:|:-:|:-:|:-:|
 
-- **Downlink Message**: 服务器->网关->终端
-*Downlink PHY structure:*
+
+###**Downlink Message**: 服务器->网关->终端
+***Downlink PHY structure:***
 
 
 |Preamble|PHDR|PHDR_CRC|PHYPayload|
 |:-:|:-:|:-:|:-:|
 
-##Receive Window
-###每一个uplink传输终端设备会打开两个短的接收窗口。
+
+###**Receive Window**
+- 每一个uplink传输终端设备会打开两个短的接收窗口。the receive window start times is a configured periods(周期) are the end of the transmission of the last uplink bit。
+- 接收窗口时间的长度必须满足终端设备有效的检测到downlink的前导码所需的时间。
+- 如果接收窗口中检测到前导码，这无线接收状态会一直保持到downlink帧被解调完毕。如果在第一接收窗口检测到一帧数据并解调后其MIC正确并终端设备地址为该设备的地址，那么终端设备的第二接收窗口将不会打开。
+- 如果网络服务器打算发送一次downlink到终端设备，那么网络服务器总是在两个接收窗口之一开始的时候进行发送downlink。
+- 如果一个终端设备已经处于第一或第二接收窗口正在在接收上一次传输的downlink消息时，不得发送另外一个uplink消息，或者上一次传输时第二接收窗口过期之前。
+- 节点只要符合当地条款和兼容LoRaWAN协议就可以使用其他协议和LoRaWAN协议来发送或接收数据。
 
 
 ----------
+- **LoRa消息格式**:
 
 **PHYPayload:**
 
@@ -56,22 +64,22 @@
 |:-:|:-:|:-:|:-:|
 
 
-----------
 ###**MAC Layer(PHYPayload)**
 
 |Size(byte)|1|1..M|4|
 |:--:|:-:|:-:|:-:|
 |**PHPayload**|MHDR|MACPayload|MIC|
 
-M的最大值根据具体命令来决定。
 
-###MAC Header(MHDR field)
+- **M的最大值根据具体命令来决定**。
+
+###**MAC Header(MHDR field)**
 
 |Bit#|7..5|4..2|1..0|
 |:-:|:-:|:-:|:-:|
 |**MHDR bits**|MType|RFU|Major|
 
-Message type(MType bit filed)
+###**Message type(MType bit filed)**
 
 |MType|Description|
 |:-:|:-:|
@@ -90,14 +98,14 @@ Message type(MType bit filed)
 - Data message
 Data message用来传输MAC命令和应用数据，两种数据可以在一个Message中组合传输。confirmed-data message需要接收确认，而unconfirmed-data message不需要确认。Proprietary messages用来发送不标准的消息格式，不能与标准消息格式之间相互通信，但是能用于拥有专有扩展(Proprietary extensions)的设备之间进行通信。
 
-Major version of data message(Major bit field)
+###**Major version of data message(Major bit field)**
 
 |Major bits|Description|
 |:-:|:-:|
 |00|LoRaWAN R1|
 |01..11|RFU|
 
-###MAC Payload of Data Messages(MACPayload)
+###**MAC Payload of Data Messages(MACPayload)**
 包含一个帧头(**FHDR**)其次有一个可选的Port字段(**FPort**)和可选的帧Payload字段(**FRMPayload**)。
 
 - **Frame header(FHDR)**
@@ -107,19 +115,19 @@ Major version of data message(Major bit field)
 |:-:|:-:|:-:|:-:|:-:|
 |**FHDR**|DevAddr|FCtrl|FCnt|FOpts|
 
-downlink 帧时FCtrl在帧头的内容为：
+###**downlink 帧时FCtrl在帧头的内容为**：
 
 |Bit#|7|6|5|4|[3..0]|
 |:-:|:-:|:-:|:-:|:-:|:-:|
 |**FCtrl bits**|ADR|ADRACKReq|ACK|FPending|FOptsLen|
 
-uplink 帧时FCtrl在帧头的内容为：
+###**uplink 帧时FCtrl在帧头的内容为**：
 
 |Bit#|7|6|5|4|[3..0]|
 |:-:|:-:|:-:|:-:|:-:|:-:|
 |**FCtrl bits**|ADR|ADRACKReq|ACK|RFU|FOptsLen|
 
-**自适应数据速率(ADR)控制在帧头(ADR, ADRACKReq in FCtrl)**
+###**自适应数据速率(ADR)控制在帧头(ADR, ADRACKReq in FCtrl)**
 
 - LoRa网络允许终端设备单独使用任何可能的数据传输速率。这个特性用来让LoRaWAN为静止的终端设备的数据速率能够适应和优化。简称自适应数据速率，当这个特性使能时网络能优化可能使用的最高的数据率。
 - 用ADR来管理移动的终端设备的数据率是不实用的，在快速变化的无线环境下移动的终端设备应使用其固定的缺省数据率。
@@ -130,13 +138,13 @@ uplink 帧时FCtrl在帧头的内容为：
 - 不要求一个ADR确认请求立即回复，为网络以最佳调度其downlink提供了灵活性。
 - 在uplink传输如果ADR_ACK_CNT >= ADR_ACK_LIMIT 并且当前的数据速率大于设备定义的最小数据速率**ADRACKReq**位被置1，在其它条件下被置0。
 
-**消息应答位和应答过程(ACK in FCtrl)**
+###**消息应答位和应答过程(ACK in FCtrl)**
 
 - 当收到一个确认数据消息，这个接收方将应答一个数据帧，数据帧的应答位(**ACK**)置1。如果发送方是一个终端设备，终端设备发送操作之后打开一个接收窗口来接收网络将发送的应答。如果发送方是网关，终端设备发送一个自行决定的应答。
 - 应答仅在接收到的最新消息中发送，并且不重发。
 - 为了让终端设备尽可能有简单和少的状态，在接收到一个需要确认的数据消息后可能需要立即发送一个明确的应答数据消息(可能为空的数据消息)。另外终端设备可能推迟到发送下一个数据消息才带上这个应答消息。
 
-**重传过程**
+###**重传过程**
 The number of retransmissions (and their timing) for the same message where an acknowlegment is requested but not received is at the discretion of the end-device and may be different for each end-device, it can also be set or adjusted from the network server.
 重传的次数(和重传时间)可以设置和网络服务器来调整。对于相同的请求应答消息
 
@@ -144,18 +152,18 @@ The number of retransmissions (and their timing) for the same message where an a
 
 如果网络服务器的重传次数达到最大值还没有收到应答，通常会认为这个终端设备无法访问，直到在重新收到来自这个终端的消息。如果终端设备再次连接上网络服务器会重新发一次消息或者放弃这个消息并继续。
 
-**帧填挂起位(FPending in FCtrl, downlink only)**
+###**帧填挂起位(FPending in FCtrl, downlink only)**
 帧挂起位仅在downlink通讯中使用，说明网关有更多的数据等待被发送并且因此询问这个终端设备是否能发送另一个uplink消息尽可能快的打开另一个接收窗口。
 
-**帧计数(FCnt)**
+###**帧计数(FCnt)**
 每个终端设备有两个帧计数器，一个用来记录发送到网络服务器的uplink(FCntUp),由终端增加FCntUp计数；另一个用来记录网络服务器发送给终端设备的downlink(FCntDown), 由网络服务器增加FCntDown计数。 网络服务器记录uplink帧计数并且生成downlink计数分别给每一个终端设备。入网激活成功后，终端设备的帧计数和网络服务器对应该终端设备的帧计数都将清零。之后FCntUp和FCntDown在数据帧发送的每个方向上以1每次递增。接收方这边相应的计数值与接收到的值同步，接收到的值是递增当前值并且
 
-**帧配置(FOptsLen in FCtrl, FOpts)**
+###**帧配置(FOptsLen in FCtrl, FOpts)**
 
 - FOpts的长度有FOptsLen决定。如果FOptsLen为0则FOpts字段将不存在，如果FOptsLen不为0，如果MAC命在FOpts字段，port 0在这时不能使用(这时的port必须是不为0或没有)。
 - MAC命令不能同时在payload字段和帧配置字段。
 
-**端口字段(FPort)**
+###**端口字段(FPort)**
 
 - 如果帧payload字段不为空，则端口字段必须存在。如果**FPort**值为0说明**FRMPayload**只包含MAC命令；**FPort**值为1..223(0x01..0xDF)时表示特殊应用。**FPort**值224..255(0xE0..0xFF)是为以后标准化应用扩展而保留的。
 
@@ -165,7 +173,7 @@ The number of retransmissions (and their timing) for the same message where an a
 
 N必须小于或等于：N ≤ M - 1 - (**FHDR**长度) 这里的M是MAC payload的最大长度。单位：字节。
 
-**MAC帧Payload加密(FRMPayload)**
+###**MAC帧Payload加密(FRMPayload)**
 
 - 如果数据帧携带有payload，**FRMPayload**必须在消息完整性代码(**MIC**)计算之前进行加密。
 - 加密方案使用的是IEEE 802.15.4/2006 Annex B[IEEE802154] 128位key的AES加密。
