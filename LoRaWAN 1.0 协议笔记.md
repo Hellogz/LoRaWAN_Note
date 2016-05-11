@@ -222,7 +222,9 @@ MAC 命令表 **CID**看后八位。
 
 - **Margin**(demodulation margin)为8位无符号整型，取值范围0～254，用来说明最后成功收到的 ***LinkCheckReq*** 命令的link margin 值，单位dB(幅度)。
 - **GwCnt** 是表示成功接收到最后的 ***LinkCheckReq*** 命令的网关数量。
+
 ###**Link ADR command**(LinkADRReq, LinkADRAns)
+
 - ***LinkADRReq*** 命令是网络服务器请求一个终端设备执行速率适配。
 
 |Size(bytes)|1|2|1|
@@ -253,7 +255,7 @@ MAC 命令表 **CID**看后八位。
 |Redundancy bits|RFU|ChMaskCntl|NbRep|
 
 
-- **NbRep** 表示每一次uplink消息重复次数。仅用于 unconfirmed uplink frames。默认值是1, 有效范围1～15，如果**NbRep**== 0，终端设备应该使用默认值1。每一次重复都是在接收窗口过期后，跳频也会在这期间进行。
+- **NbRep** 表示每一次uplink消息重复次数。仅用于 unconfirmed uplink frames。默认值是1, 有效范围1～15，如果**NbRep** ==  0，终端设备应该使用默认值1。每一次重复都是在接收窗口过期后，跳频也会在这期间进行。
 - The channel mask control(**ChMaskCntl**)field controls the interpretation of the previously defined **Chmask** bit mask. This field will only be non-zero values in networks where more than 16 channels are implemented. It controls the block of 16 channels to which the **ChMask** applies. It can also be used to globally turn on or off all channels using specific modulation. This field usage is region specific and is defined in Chapter 7.
 - 信道的频率是区域专用的在第6章中定义它们。一个终端设备用***LinkADRAns***命令来应答***LinkADRReq***命令。
 
