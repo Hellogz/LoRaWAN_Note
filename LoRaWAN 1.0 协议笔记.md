@@ -509,6 +509,10 @@ aes128_decrypt(AppKey, AppNonce|NetID|DevAddr|RFU|RxDelay|CFList|MIC)
 - 使用Personalization激活一个终端设备，意味着 **DevAddr**、**NwkSKey**和**AppSKey**直接存储在终端设备里替换OTA激活的**DevEUI**、**AppEUI**和**AppKey**。终端设备配置了开始加入一个特定的LoRa网络时所需的信息。
 - 每一个设备必须有唯一的NwkSKey和AppSKey。这样一个设备的密钥被破解了也不会造成其他设备的安全性危险。创建密钥过程不应该被公开(比如节点地址)。
 
+
+----------
+
+
 ##**Physical Layer**
 ###**默认参数**
 - **US902-928**, **EU863-870**, **CN779-787**, **EU433**的默认设置相同，如下表所示：
