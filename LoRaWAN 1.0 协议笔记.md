@@ -510,3 +510,110 @@ aes128_decrypt(AppKey, AppNonce|NetID|DevAddr|RFU|RxDelay|CFList|MIC)
 - 每一个设备必须有唯一的NwkSKey和AppSKey。这样一个设备的密钥被破解了也不会造成其他设备的安全性危险。创建密钥过程不应该被公开(比如节点地址)。
 
 ##**Physical Layer**
+###**默认参数**
+- **US902-928**, **EU863-870**, **CN779-787**, **EU433**的默认设置相同，如下表所示：
+
+|参数|默认值|
+|:-:|:-:|
+|RECEIVE_DELAY1|1 s|
+|RECEIVE_DELAY2|2 s(must be RECEIVE_DELAY + 1s)|
+|JOIN_ACCEPT_DELAY1|5 s|
+|JOIN_ACCEPT_DELAY2|6 s|
+|MAX_FCNT_GAP|16384|
+|ADR_ACK_LIMIT|64|
+|ADR_ACK_DELAY|32|
+|ACK_TIMEOUT|2 +/- 1 s(random delay between 1 and 3 seconds)|
+
+- **ISM Band**: ISM频段（Industrial Scientific Medical Band），中文意思分别是工业的(Industrial)、科学的(Scientific)和医学的(Medical)，因此顾名思义ISM频段就是各国挪出某一段频段主要开放给工业，科学和医学机构使用。应用这些频段无需许可证或费用，只需要遵守一定的发射功率（一般低于1W），并且不要对其它频段造成干扰即可。ISM频段在各国的规定并不统一。
+
+###**每一个频段都有相应的**：
+- 前导格式(**Preamble Format**)
+- 通道频率(**Channel frequencies**)
+- 数据速率和终端设备输出功率编码**Data Rate and End-point Output Power encoding**
+- **JoinAccept CFList**
+- **LinkAdrReq command**
+- **Maximum payload size**
+- **Receive windows**
+- **Default Settings**
+
+
+----------
+
+
+##**Config M100A**
+###**Activation**:
+- DevEui(8byte) 
++ Activation: 
+    + Over the Air
+    	- AppEUI(8byte)
+    	- AppKey(16byte)
+    + Personalization
+    	- Device Address(4byte)
+    	- NwkSKey(16byte)
+    	- AppSKey(16byte)
+	
+###**MAC Layer**:
+- Tx Power: 20 dBm
+- ADR: ON or OFF
+- Dara rate: DR_SF12 ~ DR_SF7
+- Channel mask(2byte): 01FF
+- Transmission redundancy: 1
+- EU868 PHY duty cycle: ON or OFF
+- Network type: Public or Private
++ RX2 Channel
+	- Frequency(MHz): 434.9 MHz
+	- Data rate: DR_SF9
+- Receive delay 1(s): 1.0
+- Receive delay 2(s): 2.0
+- Join accept delay 1(s): 5.0
+- Join accept delay 2(s): 6.0
+
+###**Channel**:
+|ID|Frequency[MHz]|DR MIN|DR MAX|Duty Cycle|
+|:-:|:-:|:-:|:-:|:-:|
+|0|433.3|DR_SF12|DR_SF7|865-868 MHz DC-1%|
+|1|433.5|DR_SF12|DR_SF7|865-868 MHz DC-1%|
+|2|433.7|DR_SF12|DR_SF7|865-868 MHz DC-1%|
+|3|433.9|DR_SF12|DR_SF7|865-868 MHz DC-1%|
+|4|434.1|DR_SF12|DR_SF7|865-868 MHz DC-1%|
+|5|434.3|DR_SF12|DR_SF7|865-868 MHz DC-1%|
+|6|434.5|DR_SF12|DR_SF7|865-868 MHz DC-1%|
+|7|434.7|DR_SF12|DR_SF7|865-868 MHz DC-1%|
+|8|0.0|DR_SF12|DR_SF12|865-868 MHz DC-1%|
+|9|0.0|DR_SF12|DR_SF12|865-868 MHz DC-1%|
+|10|0.0|DR_SF12|DR_SF12|865-868 MHz DC-1%|
+|11|0.0|DR_SF12|DR_SF12|865-868 MHz DC-1%|
+|...|...|...|...|...|
+|15|0.0|DR_SF12|DR_SF12|865-868 MHz DC-1%|
+
+###**Application**:
+- Application mode: Sensors GPS demo
+- Tx duty cycle: 5.0 s
+- Tx duty cycle random: 1.0 s
+- Downlink test: ON or OFF
+
+
+----------
+
+
+|Parameter| Description|
+|:-:|:-:|
+|devaddr| Sets the unique network device address for the RN2483 module.|
+|deveui| Sets the globally unique identifier for the RN2483 module.|
+|appeui| Sets the application identifier for the RN2483 module.|
+|nwkskey| Sets the network session key for the RN2483 module.|
+|appskey| Sets the application session key for the RN2483 module. |
+|appkey| Sets the application key for the RN2483 module. |
+|pwridx| Sets the output power to be used on the next transmissions. |
+|dr| Sets the data rate to be used for the next transmissions.|
+|adr| Sets if the adaptive data rate is to be enabled, or disabled. |
+|bat| Sets the battery level needed for Device Status Answer frame command response. |
+|retx| Sets the number of retransmissions to be used for an uplink confirmed packet.|
+|linkchk| Sets the time interval for the link check process to be triggered. |
+|rxdelay1| Sets the value used for the first Receive window delay.|
+|ar| Sets the state of the automatic reply. |
+|rx2| Sets the data rate and frequency used for the second Receive window. |
+|sync| Sets the synchronization word for the LoRaWAN™ communication.|
+|upctr| Sets the value of the uplink frame counter that will be used for the next uplink transmission.|
+|dnctr| Sets the value of the downlink frame counter that will be used for the next downlink reception.|
+|ch| Allows modification of channel related parameters.|
