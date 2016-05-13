@@ -559,7 +559,7 @@ aes128_decrypt(AppKey, AppNonce|NetID|DevAddr|RFU|RxDelay|CFList|MIC)
 ###**MAC Layer**:
 - Tx Power: 20 dBm
 - ADR: ON or OFF
-- Dara rate: DR_SF12 ~ DR_SF7
+- Data rate: DR_SF12 ~ DR_SF7
 - Channel mask(2byte): 01FF
 - Transmission redundancy: 1
 - EU868 PHY duty cycle: ON or OFF
