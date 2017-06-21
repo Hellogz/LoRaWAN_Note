@@ -4,13 +4,13 @@
 
 ---
 
-##**终端设备需要遵守的约定**：
+## **终端设备需要遵守的约定**：
 - 终端设备在每一次数据传输中通过伪随机数的方式来改变信道。这个得到的通信频率使系统在干扰的情况下更稳定。
 - 终端设备遵循在当地法规允许的子频段中最大传输占空比。
 - 终端设备遵循在当地法规允许的子频段中最大传输持续时间或停滞时间。
 
 ----------
-##**LoRaWAN Classes**：
+## **LoRaWAN Classes**：
 - **Class A** 双向终端设备：支持Class A的终端设备在双向传输中每一次终端设备uplink传输后会有两个短的downlink接收窗口。这个传输时间间隙通过终端设备基于自身传输需要一个随机时间基础上微小的变化确定(**ALOHA**型协议)。Class A是为超低功耗终端设备系统只需要终端发送了一次uplink传输后服务器马上downlink传输的应用。来自服务器的任何downlink通信必须等到下一次计划的uplink。
 - **Class B** 绑定接收时隙的双向终端设备：支持 Class B的终端设备拥有更多的接收时隙。在Class A随机接收窗口上增加，Class B设备在计划时间里打开额外的接收窗口。来自gateway的指令让终端设备在计划时间里打开接收窗口接收时间同步信标(time synchronized Beacon)。这样能让服务器知道终端设备在监听中。
 - **Class C** 拥有最大接收时隙的双向终端设备：支持Class C的终端设备有一个几乎一直开启接收的窗口，只有传输中的时候才关闭。对比Class A或Class B终端设备将使用更多的电量来运行Class C，但是服务器到终端设备的通信Class C提供最低的延迟。
@@ -19,8 +19,8 @@
 
 ----------
 
-##**Physical Message Formats**
-###**Uplink Messages**： 终端设备->网关(1 or More)->服务器
+## **Physical Message Formats**
+### **Uplink Messages**： 终端设备->网关(1 or More)->服务器
 ***Uplink PHY structure:***
 
 
@@ -28,7 +28,7 @@
 |:-:|:-:|:-:|:-:|:-:|
 
 
-###**Downlink Message**: 服务器->网关->终端
+### **Downlink Message**: 服务器->网关->终端
 ***Downlink PHY structure:***
 
 
@@ -36,7 +36,7 @@
 |:-:|:-:|:-:|:-:|
 
 
-###**Receive Window**
+### **Receive Window**
 - 每一个uplink传输终端设备会打开两个短的接收窗口。the receive window start times is a configured periods(周期) are the end of the transmission of the last uplink bit。
 - 接收窗口时间的长度必须满足终端设备有效的检测到downlink的前导码所需的时间。
 - 如果接收窗口中检测到前导码，这无线接收状态会一直保持到downlink帧被解调完毕。如果在第一接收窗口检测到一帧数据并解调后其MIC正确并终端设备地址为该设备的地址，那么终端设备的第二接收窗口将不会打开。
@@ -64,7 +64,7 @@
 |:-:|:-:|:-:|:-:|
 
 
-###**MAC Layer(PHYPayload)**
+### **MAC Layer(PHYPayload)**
 
 |Size(byte)|1|1..M|4|
 |:--:|:-:|:-:|:-:|
@@ -73,13 +73,13 @@
 
 - **M的最大值根据具体命令来决定**。
 
-###**MAC Header(MHDR field)**
+### **MAC Header(MHDR field)**
 
 |Bit#|7..5|4..2|1..0|
 |:-:|:-:|:-:|:-:|
 |**MHDR bits**|MType|RFU|Major|
 
-###**Message type(MType bit filed)**
+### **Message type(MType bit filed)**
 
 |MType|Description|
 |:-:|:-:|
@@ -98,14 +98,14 @@
 - Data message
 Data message用来传输MAC命令和应用数据，两种数据可以在一个Message中组合传输。confirmed-data message需要接收确认，而unconfirmed-data message不需要确认。Proprietary messages用来发送不标准的消息格式，不能与标准消息格式之间相互通信，但是能用于拥有专有扩展(Proprietary extensions)的设备之间进行通信。
 
-###**Major version of data message(Major bit field)**
+### **Major version of data message(Major bit field)**
 
 |Major bits|Description|
 |:-:|:-:|
 |00|LoRaWAN R1|
 |01..11|RFU|
 
-###**MAC Payload of Data Messages(MACPayload)**
+### **MAC Payload of Data Messages(MACPayload)**
 包含一个帧头(**FHDR**)其次有一个可选的Port字段(**FPort**)和可选的帧Payload字段(**FRMPayload**)。
 
 - **Frame header(FHDR)**
@@ -115,19 +115,19 @@ Data message用来传输MAC命令和应用数据，两种数据可以在一个Me
 |:-:|:-:|:-:|:-:|:-:|
 |**FHDR**|DevAddr|FCtrl|FCnt|FOpts|
 
-###**downlink 帧时FCtrl在帧头的内容为**：
+### **downlink 帧时FCtrl在帧头的内容为**：
 
 |Bit#|7|6|5|4|[3..0]|
 |:-:|:-:|:-:|:-:|:-:|:-:|
 |**FCtrl bits**|ADR|ADRACKReq|ACK|FPending|FOptsLen|
 
-###**uplink 帧时FCtrl在帧头的内容为**：
+### **uplink 帧时FCtrl在帧头的内容为**：
 
 |Bit#|7|6|5|4|[3..0]|
 |:-:|:-:|:-:|:-:|:-:|:-:|
 |**FCtrl bits**|ADR|ADRACKReq|ACK|RFU|FOptsLen|
 
-###**自适应数据速率(ADR)控制在帧头(ADR, ADRACKReq in FCtrl)**
+### **自适应数据速率(ADR)控制在帧头(ADR, ADRACKReq in FCtrl)**
 
 - LoRa网络允许终端设备单独使用任何可能的数据传输速率。这个特性用来让LoRaWAN为静止的终端设备的数据速率能够适应和优化。简称自适应数据速率，当这个特性使能时网络能优化可能使用的最高的数据率。
 - 用ADR来管理移动的终端设备的数据率是不实用的，在快速变化的无线环境下移动的终端设备应使用其固定的缺省数据率。
@@ -138,13 +138,13 @@ Data message用来传输MAC命令和应用数据，两种数据可以在一个Me
 - 不要求一个ADR确认请求立即回复，为网络以最佳调度其downlink提供了灵活性。
 - 在uplink传输如果ADR_ACK_CNT >= ADR_ACK_LIMIT 并且当前的数据速率大于设备定义的最小数据速率**ADRACKReq**位被置1，在其它条件下被置0。
 
-###**消息应答位和应答过程(ACK in FCtrl)**
+### **消息应答位和应答过程(ACK in FCtrl)**
 
 - 当收到一个确认数据消息，这个接收方将应答一个数据帧，数据帧的应答位(**ACK**)置1。如果发送方是一个终端设备，终端设备发送操作之后打开一个接收窗口来接收网络将发送的应答。如果发送方是网关，终端设备发送一个自行决定的应答。
 - 应答仅在接收到的最新消息中发送，并且不重发。
 - 为了让终端设备尽可能有简单和少的状态，在接收到一个需要确认的数据消息后可能需要立即发送一个明确的应答数据消息(可能为空的数据消息)。另外终端设备可能推迟到发送下一个数据消息才带上这个应答消息。
 
-###**重传过程**
+### **重传过程**
 The number of retransmissions (and their timing) for the same message where an acknowlegment is requested but not received is at the discretion of the end-device and may be different for each end-device, it can also be set or adjusted from the network server.
 重传的次数(和重传时间)可以设置和网络服务器来调整。对于相同的请求应答消息
 
@@ -152,18 +152,18 @@ The number of retransmissions (and their timing) for the same message where an a
 
 如果网络服务器的重传次数达到最大值还没有收到应答，通常会认为这个终端设备无法访问，直到在重新收到来自这个终端的消息。如果终端设备再次连接上网络服务器会重新发一次消息或者放弃这个消息并继续。
 
-###**帧填挂起位(FPending in FCtrl, downlink only)**
+### **帧填挂起位(FPending in FCtrl, downlink only)**
 帧挂起位仅在downlink通讯中使用，说明网关有更多的数据等待被发送并且因此询问这个终端设备是否能发送另一个uplink消息尽可能快的打开另一个接收窗口。
 
-###**帧计数(FCnt)**
+### **帧计数(FCnt)**
 每个终端设备有两个帧计数器，一个用来记录发送到网络服务器的uplink(FCntUp),由终端增加FCntUp计数；另一个用来记录网络服务器发送给终端设备的downlink(FCntDown), 由网络服务器增加FCntDown计数。 网络服务器记录uplink帧计数并且生成downlink计数分别给每一个终端设备。入网激活成功后，终端设备的帧计数和网络服务器对应该终端设备的帧计数都将清零。之后FCntUp和FCntDown在数据帧发送的每个方向上以1每次递增。接收方这边相应的计数值与接收到的值同步，接收到的值是递增当前值并且
 
-###**帧配置(FOptsLen in FCtrl, FOpts)**
+### **帧配置(FOptsLen in FCtrl, FOpts)**
 
 - FOpts的长度有FOptsLen决定。如果FOptsLen为0则FOpts字段将不存在，如果FOptsLen不为0，如果MAC命在FOpts字段，port 0在这时不能使用(这时的port必须是不为0或没有)。
 - MAC命令不能同时在payload字段和帧配置字段。
 
-###**端口字段(FPort)**
+### **端口字段(FPort)**
 
 - 如果帧payload字段不为空，则端口字段必须存在。如果**FPort**值为0说明**FRMPayload**只包含MAC命令；**FPort**值为1..223(0x01..0xDF)时表示特殊应用。**FPort**值224..255(0xE0..0xFF)是为以后标准化应用扩展而保留的。
 
@@ -173,7 +173,7 @@ The number of retransmissions (and their timing) for the same message where an a
 
 N必须小于或等于：N ≤ M - 1 - (**FHDR**长度) 这里的M是MAC payload的最大长度。单位：字节。
 
-###**MAC帧Payload加密(FRMPayload)**
+### **MAC帧Payload加密(FRMPayload)**
 
 - 如果数据帧携带有payload，**FRMPayload**必须在消息完整性代码(**MIC**)计算之前进行加密。
 - 加密方案使用的是IEEE 802.15.4/2006 Annex B[IEEE802154] 128位key的AES加密。
@@ -183,7 +183,7 @@ N必须小于或等于：N ≤ M - 1 - (**FHDR**长度) 这里的M是MAC payload
 ----------
 
 
-##**MAC Commands**
+## **MAC Commands**
 
 - 一个单一数据的帧能包含MAC命令的任何序列，或者捎带在**FOpts**字段里，当发送一个数据在**FRMPayload**字段的帧时，**FPort**字段要设置为0。发送数据**FOpts**字段带有MAC命令时，必须不加密和不超过15个字节长度。MCA命令在**FRMPayload**字段时，必须加密和不能超过**FRMPayload**字段最大限制长度。
 - MAC指令为了不被监听者破解，必须通过在一个单独的数据帧里的**FRMPayload**字段来发送MAC指令。
@@ -211,7 +211,7 @@ MAC 命令表 **CID**看后八位。
 
 - 任何服务器调整的值直到终端设备下一次Join时才会失效。因此，在每次成功的Join，设备都是使用默认参数，是否需要服务器重新调整参数，取决于需求。
 
-###**Link Check commands**(LinkCheckReq, LinkCheckAns)
+### **Link Check commands**(LinkCheckReq, LinkCheckAns)
 - ***LinkCheckReq*** 命令是终端设备用来验证是否连接上网，该命令没有payload。
 - 当 ***LinkCheckReq*** 命令被网络服务器收到，将通过一个或多个网关来响应一条 ***LinkCheckAns***命令。
 
@@ -223,7 +223,7 @@ MAC 命令表 **CID**看后八位。
 - **Margin**(demodulation margin)为8位无符号整型，取值范围0～254，用来说明最后成功收到的 ***LinkCheckReq*** 命令的link margin 值，单位dB(幅度)。
 - **GwCnt** 是表示成功接收到最后的 ***LinkCheckReq*** 命令的网关数量。
 
-###**Link ADR command**(LinkADRReq, LinkADRAns)
+### **Link ADR command**(LinkADRReq, LinkADRAns)
 
 - ***LinkADRReq*** 命令是网络服务器请求一个终端设备执行速率适配。
 
@@ -278,7 +278,7 @@ MAC 命令表 **CID**看后八位。
 
 
 - 如果这3个字段中的任何一个为0，则该命令没有设置成功，节点一直保持以前的状态。
-###**End-Device Transmit Duty Cycle**(DutyCycleReq, DutyCycleAns)
+### **End-Device Transmit Duty Cycle**(DutyCycleReq, DutyCycleAns)
 - 该DutyCycleReq命令通过网络协调器来限制一个终端设备的最大总发射占空比。总发射占空比对应于发射占空比所有子频段。
 
 |Size(bytes)|1|
@@ -291,7 +291,7 @@ MAC 命令表 **CID**看后八位。
 - 值255意味着终端设备应立即变得沉默(silent)。相等于远程切断终端设备。
 - 终端设备使用 ***DutyCycleAns*** 来应答 ***DutyCycleReq*** 命令。***DutyCycleAns*** 不含任何Payload。
 
-###**Receive Window Parameters**(RXParamSetupReq, RXParamSetupAns)
+### **Receive Window Parameters**(RXParamSetupReq, RXParamSetupAns)
 - ***RXParamSetupReq***命令允许修改每一个uplink之后的第二接收窗口(RX2)的频率和数据率。该命令还允许uplink和RX1时隙downlink数据速率之间的offset修改
 
 |Size(bytes)|1|3|
@@ -324,7 +324,7 @@ MAC 命令表 **CID**看后八位。
 
 - 如果这3个字段中的任何一个为0，则该命令没有设置成功，保持之前的参数。
 
-###**End-Device Status**(DevStatusReq, DevStatusAns)
+### **End-Device Status**(DevStatusReq, DevStatusAns)
 - 通过***DevStatusReq***命令向一个终端设备请求状态信息。该命令没有Payload。如果***DevStatusReq***命令的接收者是一个终端设备，终端设备需用***DevStatusAns***命令来响应。
 
 |Size(bytes)|1|1|
@@ -347,7 +347,7 @@ MAC 命令表 **CID**看后八位。
 |Status|RFU|Margin|
 
 
-###**Creation / Modification of a Channel**(NewChannelReq, NewChannelAns)
+### **Creation / Modification of a Channel**(NewChannelReq, NewChannelAns)
 - ***NewChannelReq*** 命令可以用于修改现有信道的参数或者创建一个新的。该命令用于设置这个频道上可用的新的信道的中心频率和数据率的范围：
 
 |Size(bytes)|1|3|1|
@@ -384,7 +384,7 @@ MAC 命令表 **CID**看后八位。
 
 - 如果这2个位中的任何一个为0，则该命令没有成功，新的信道没有创建。
 
-###**Setting delay between TX and RX**(RXTimingSetupReq, RXTimingSetupAns)
+### **Setting delay between TX and RX**(RXTimingSetupReq, RXTimingSetupAns)
 - ***RXTimingSetupReq*** 命令允许配置 TX uplink 和 打开第一接收窗口时隙间的延迟(Delay)。在第一接收窗口时隙打开一秒之后第二接收窗口时隙才打开。
 
 |Size(bytes)|1|
@@ -416,15 +416,15 @@ MAC 命令表 **CID**看后八位。
 
 ----------
 
-##**End-Device Activation**
+## **End-Device Activation**
 
 - 要加入到 LoRaWAN 网络中来，每一个终端设备必须 personalized(个性化)和激活(activated)。
 - 一个终端设备的激活可以通过两种方式来实现，无论是当一个终端设备被部署或复位后通过 **Over-The-Air Activation** （OTAA），或通过 **Activation By Personalization** (激活由个性化)（ABP），其中终端设备的个性化和激活的两个步骤为一个步骤完成。
 
-###**Data Stored in the End-device after Activation**
+### **Data Stored in the End-device after Activation**
 - 激活后，将下面的信息存储在终端设备里：一个设备地址(**DevAddr**)，一个应用标识符(**AppEUI**)，一个网络会话密钥(**NwkSKey**)，和一个应用会话密钥(**AppSKey**)。
 
-###**End-device address(DevAddr)**
+### **End-device address(DevAddr)**
 - 当前网络内的终端设备的32位标识码就是设备的 **DevAddr** 。格式如下：
 
 |Bit#|31:25|24:0|
@@ -434,31 +434,31 @@ MAC 命令表 **CID**看后八位。
 
 - 最有用的7位是网络标识符(**NwkID**)用于区分不同地区范围的网络运营商的网络地址，以纠正漫游的问题。另外25位为终端设备的网络地址(**NwkAddr**)，可以由任意的网络管理器分配。
 
-###**Application identifier(AppEUI)**
+### **Application identifier(AppEUI)**
 - **AppEUI** 是在IEEE EUI64地址范围唯一标识终端设备的应用程序提供商的全球应用ID。
 - 在激活过程之前这个 **AppEUI** 就存储在终端设备中了。
 
-###**Network session key(NwkSKey)**
+### **Network session key(NwkSKey)**
 - **NwkSKey** 是一个 网络会话密钥，指定用于终端设备。它是用于网络服务器和终端设备来计算和验证所有数据消息的 **MIC**（消息完整性代码），以确保数据的完整性。它还用于加密和解密仅数据消息的MAC payload。
 
-###**Application session key(AppSKey)**
+### **Application session key(AppSKey)**
 - **AppSKey** 是一个应用会话密钥，指定用于终端设备。它用于由网络服务器和终端设备都进行加密和解密应用程序特定数据的消息的payload字段。它还用来计算和验证可以包括在应用程序特定数据的消息的Payload的应用程序级的MIC。
 
-###**Over-the-Air Activation**
+### **Over-the-Air Activation**
 - 用于空中激活，终端设备必须遵循Join步骤才能与网络服务器进行数据交换。每当终端设备丢失了网络连接，必须重新Join网络。
 - 在Join之前以下信息需要设置：全球唯一终端设备标识符(**DevEUI**)，程序标识符(**AppEUI**)，一个AES-128密钥(**AppKey**)。
 - 使用空中激活时，终端设备不用设置任何形式的网络密钥。相反，当一个终端设备加入网络，网络会话密钥将用于加密和验证网络级的传输。这种方式便于不同的供应商的网络之间的终端设备漫游。同时使用网络会话密钥和应用会话密钥还允许在其中应用的数据不能由网络提供商来读取或篡改联合网络服务器。
 
-###**End-device identifier(DevEUI)**
+### **End-device identifier(DevEUI)**
 - **DevEUI** 是终端设备在IEEE EUI64地址空间的全球终端设备ID唯一标识。
 
-###**Application key(AppKey)**
+### **Application key(AppKey)**
 - **AppKey** 用于生成 NwkSKey 和 AppSKey。
 
-###**Join procedure**
+### **Join procedure**
 - 对于终端设备，Join 过程包括 **Join request** 和 **Join accept** 两个过程与服务器的MAC消息交互。
 
-###**Join-request message**
+### **Join-request message**
 - Join 过程总是从终端设备发起join-request请求开始。
 
 |Size(bytes)|8|8|2|
@@ -473,7 +473,7 @@ MAC 命令表 **CID**看后八位。
 MIC = *cmac*[0..3]
 - **Join-request消息没有加密**。
 
-###**Join-accept message**
+### **Join-accept message**
 - 如果**Join-request**被允许，将发送**Join-accept**来应答。Join-accept消息像普通的downlink消息一样但是使用的延迟是JOIN_ACCEPT_DELAY1 和 JOIN_ACCEPT_DELAY2。Join-accept使用的频率和数据速率和RX1、RX2的相同。
 - 如果Join-request没有响应，表明不允许加入该网络。
 
@@ -504,7 +504,7 @@ aes128_decrypt(AppKey, AppNonce|NetID|DevAddr|RFU|RxDelay|CFList|MIC)
 - uplink和downlink数据速率之间的实际关系和具体区域有关。
 - **RxDelay** 延迟遵循**RXTimingSetupReq**命令中的**Delay**字段一样的延迟约定。
 
-###**Activation by Personalization**
+### **Activation by Personalization**
 - 某些情况下，终端设备可以由Personalization（个性化）激活。终端设备通过Personalization绕过 **Join-request Join-accept** 过程来加入特定的网络。
 - 使用Personalization激活一个终端设备，意味着 **DevAddr**、**NwkSKey**和**AppSKey**直接存储在终端设备里替换OTA激活的**DevEUI**、**AppEUI**和**AppKey**。终端设备配置了开始加入一个特定的LoRa网络时所需的信息。
 - 每一个设备必须有唯一的NwkSKey和AppSKey。这样一个设备的密钥被破解了也不会造成其他设备的安全性危险。创建密钥过程不应该被公开(比如节点地址)。
@@ -513,8 +513,8 @@ aes128_decrypt(AppKey, AppNonce|NetID|DevAddr|RFU|RxDelay|CFList|MIC)
 ----------
 
 
-##**Physical Layer**
-###**默认参数**
+## **Physical Layer**
+### **默认参数**
 - **US902-928**, **EU863-870**, **CN779-787**, **EU433**的默认设置相同，如下表所示：
 
 |参数|默认值|
@@ -530,7 +530,7 @@ aes128_decrypt(AppKey, AppNonce|NetID|DevAddr|RFU|RxDelay|CFList|MIC)
 
 - **ISM Band**: ISM频段（Industrial Scientific Medical Band），中文意思分别是工业的(Industrial)、科学的(Scientific)和医学的(Medical)，因此顾名思义ISM频段就是各国挪出某一段频段主要开放给工业，科学和医学机构使用。应用这些频段无需许可证或费用，只需要遵守一定的发射功率（一般低于1W），并且不要对其它频段造成干扰即可。ISM频段在各国的规定并不统一。
 
-###**每一个频段都有相应的**：
+### **每一个频段都有相应的**：
 - 前导格式(**Preamble Format**)
 - 通道频率(**Channel frequencies**)
 - 数据速率和终端设备输出功率编码**Data Rate and End-point Output Power encoding**
@@ -544,8 +544,8 @@ aes128_decrypt(AppKey, AppNonce|NetID|DevAddr|RFU|RxDelay|CFList|MIC)
 ----------
 
 
-##**Config M100A**
-###**Activation**:
+## **Config M100A**
+### **Activation**:
 - DevEui(8byte) 
 + Activation: 
     + Over the Air
@@ -556,7 +556,7 @@ aes128_decrypt(AppKey, AppNonce|NetID|DevAddr|RFU|RxDelay|CFList|MIC)
     	- NwkSKey(16byte)
     	- AppSKey(16byte)
 	
-###**MAC Layer**:
+### **MAC Layer**:
 - Tx Power: 20 dBm
 - ADR: ON or OFF
 - Data rate: DR_SF12 ~ DR_SF7
@@ -572,7 +572,7 @@ aes128_decrypt(AppKey, AppNonce|NetID|DevAddr|RFU|RxDelay|CFList|MIC)
 - Join accept delay 1(s): 5.0
 - Join accept delay 2(s): 6.0
 
-###**Channel**:
+### **Channel**:
 |ID|Frequency[MHz]|DR MIN|DR MAX|Duty Cycle|
 |:-:|:-:|:-:|:-:|:-:|
 |0|433.3|DR_SF12|DR_SF7|865-868 MHz DC-1%|
@@ -590,7 +590,7 @@ aes128_decrypt(AppKey, AppNonce|NetID|DevAddr|RFU|RxDelay|CFList|MIC)
 |...|...|...|...|...|
 |15|0.0|DR_SF12|DR_SF12|865-868 MHz DC-1%|
 
-###**Application**:
+### **Application**:
 - Application mode: Sensors GPS demo
 - Tx duty cycle: 5.0 s
 - Tx duty cycle random: 1.0 s
