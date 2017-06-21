@@ -21,7 +21,7 @@
 
 ## **Physical Message Formats**
 ### **Uplink Messages**： 终端设备->网关(1 or More)->服务器
-***Uplink PHY structure:***
+**Uplink PHY structure:**
 
 
 |Preamble|PHDR|PHDR_CRC|PHYPayload|CRC|
@@ -29,7 +29,7 @@
 
 
 ### **Downlink Message**: 服务器->网关->终端
-***Downlink PHY structure:***
+**Downlink PHY structure:**
 
 
 |Preamble|PHDR|PHDR_CRC|PHYPayload|
@@ -212,20 +212,20 @@ MAC 命令表 **CID**看后八位。
 - 任何服务器调整的值直到终端设备下一次Join时才会失效。因此，在每次成功的Join，设备都是使用默认参数，是否需要服务器重新调整参数，取决于需求。
 
 ### **Link Check commands**(LinkCheckReq, LinkCheckAns)
-- ***LinkCheckReq*** 命令是终端设备用来验证是否连接上网，该命令没有payload。
-- 当 ***LinkCheckReq*** 命令被网络服务器收到，将通过一个或多个网关来响应一条 ***LinkCheckAns***命令。
+- **LinkCheckReq** 命令是终端设备用来验证是否连接上网，该命令没有payload。
+- 当 **LinkCheckReq** 命令被网络服务器收到，将通过一个或多个网关来响应一条 **LinkCheckAns**命令。
 
 |Size(bytes)|1|1|
 |:-:|:-:|:-:|
 |LinkCheckAns Payload|Margin|GwCnt|
 
 
-- **Margin**(demodulation margin)为8位无符号整型，取值范围0～254，用来说明最后成功收到的 ***LinkCheckReq*** 命令的link margin 值，单位dB(幅度)。
-- **GwCnt** 是表示成功接收到最后的 ***LinkCheckReq*** 命令的网关数量。
+- **Margin**(demodulation margin)为8位无符号整型，取值范围0～254，用来说明最后成功收到的 **LinkCheckReq** 命令的link margin 值，单位dB(幅度)。
+- **GwCnt** 是表示成功接收到最后的 **LinkCheckReq** 命令的网关数量。
 
 ### **Link ADR command**(LinkADRReq, LinkADRAns)
 
-- ***LinkADRReq*** 命令是网络服务器请求一个终端设备执行速率适配。
+- **LinkADRReq** 命令是网络服务器请求一个终端设备执行速率适配。
 
 |Size(bytes)|1|2|1|
 |:-:|:-:|:-:|:-:|
@@ -257,7 +257,7 @@ MAC 命令表 **CID**看后八位。
 
 - **NbRep** 表示每一次uplink消息重复次数。仅用于 unconfirmed uplink frames。默认值是1, 有效范围1～15，如果**NbRep** ==  0，终端设备应该使用默认值1。每一次重复都是在接收窗口过期后，跳频也会在这期间进行。
 - The channel mask control(**ChMaskCntl**)field controls the interpretation of the previously defined **Chmask** bit mask. This field will only be non-zero values in networks where more than 16 channels are implemented. It controls the block of 16 channels to which the **ChMask** applies. It can also be used to globally turn on or off all channels using specific modulation. This field usage is region specific and is defined in Chapter 7.
-- 信道的频率是区域专用的在第6章中定义它们。一个终端设备用***LinkADRAns***命令来应答***LinkADRReq***命令。
+- 信道的频率是区域专用的在第6章中定义它们。一个终端设备用**LinkADRAns**命令来应答**LinkADRReq**命令。
 
 |Size(bytes)|1|
 |:-:|:-:|
@@ -268,7 +268,7 @@ MAC 命令表 **CID**看后八位。
 |Status bits|RFU|Power ACK|Data rate ACK|Channel mask ACK|
 
 
-- ***LinkADRAns Status*** bits具有以下含义：
+- **LinkADRAns Status** bits具有以下含义：
 
 | Field |Bit = 0|Bit = 1|
 |:-:|:-:|:-:|
@@ -289,10 +289,10 @@ MAC 命令表 **CID**看后八位。
 
 - **MaxDutyCycle**的有效值是[0：15]。除了为0则占空比没有限制，其他则由区域设置调节(Regional regulation)。
 - 值255意味着终端设备应立即变得沉默(silent)。相等于远程切断终端设备。
-- 终端设备使用 ***DutyCycleAns*** 来应答 ***DutyCycleReq*** 命令。***DutyCycleAns*** 不含任何Payload。
+- 终端设备使用 **DutyCycleAns** 来应答 **DutyCycleReq** 命令。**DutyCycleAns** 不含任何Payload。
 
 ### **Receive Window Parameters**(RXParamSetupReq, RXParamSetupAns)
-- ***RXParamSetupReq***命令允许修改每一个uplink之后的第二接收窗口(RX2)的频率和数据率。该命令还允许uplink和RX1时隙downlink数据速率之间的offset修改
+- **RXParamSetupReq**命令允许修改每一个uplink之后的第二接收窗口(RX2)的频率和数据率。该命令还允许uplink和RX1时隙downlink数据速率之间的offset修改
 
 |Size(bytes)|1|3|
 |:-:|:-:|:-:|
@@ -304,8 +304,8 @@ MAC 命令表 **CID**看后八位。
 
 
 - Rx1DRoffset字段设置的offset在uplink数据率和RX1时隙downlink数据速率之间偏移。作为默认此偏移为0。该偏移是用于考虑到最大功率密度约束在某些区域的基站和以平衡上行链路和下行链路的无线电链路余量。
-- 数据速率（RX2DataRate）字段定义了使用第二接收窗为LinkADRReq命令相同的约定下列下行链路的数据速率（例如：0意味着，DR0/125kHz）。频率(**Frequency**)字段用于第二接收窗口的信道频率，因此这个频率是在***NewChannelReq***命令定义的约定下。
-- ***RXParamSetupAns***命令是用来确认***RXParamSetupReq***命令的接收的。payload只有一个字节的status：
+- 数据速率（RX2DataRate）字段定义了使用第二接收窗为LinkADRReq命令相同的约定下列下行链路的数据速率（例如：0意味着，DR0/125kHz）。频率(**Frequency**)字段用于第二接收窗口的信道频率，因此这个频率是在**NewChannelReq**命令定义的约定下。
+- **RXParamSetupAns**命令是用来确认**RXParamSetupReq**命令的接收的。payload只有一个字节的status：
 
 |Size(bytes)|1|
 |:-:|:-:|
@@ -325,7 +325,7 @@ MAC 命令表 **CID**看后八位。
 - 如果这3个字段中的任何一个为0，则该命令没有设置成功，保持之前的参数。
 
 ### **End-Device Status**(DevStatusReq, DevStatusAns)
-- 通过***DevStatusReq***命令向一个终端设备请求状态信息。该命令没有Payload。如果***DevStatusReq***命令的接收者是一个终端设备，终端设备需用***DevStatusAns***命令来响应。
+- 通过**DevStatusReq**命令向一个终端设备请求状态信息。该命令没有Payload。如果**DevStatusReq**命令的接收者是一个终端设备，终端设备需用**DevStatusAns**命令来响应。
 
 |Size(bytes)|1|1|
 |:-:|:-:|:-:|
@@ -340,7 +340,7 @@ MAC 命令表 **CID**看后八位。
 |255|终端设备无法测量电量等级|
 
 
-- **Margin**是最后成功收到***DevStatusReq***命令经过四舍五入到最接近整数值的解调信噪比(SNR)。该值取有符号整型的6位来表示，最小值为-32，最大值为31.
+- **Margin**是最后成功收到**DevStatusReq**命令经过四舍五入到最接近整数值的解调信噪比(SNR)。该值取有符号整型的6位来表示，最小值为-32，最大值为31.
 
 |Bits|7:6|5:0|
 |:-:|:-:|:-:|
@@ -348,14 +348,14 @@ MAC 命令表 **CID**看后八位。
 
 
 ### **Creation / Modification of a Channel**(NewChannelReq, NewChannelAns)
-- ***NewChannelReq*** 命令可以用于修改现有信道的参数或者创建一个新的。该命令用于设置这个频道上可用的新的信道的中心频率和数据率的范围：
+- **NewChannelReq** 命令可以用于修改现有信道的参数或者创建一个新的。该命令用于设置这个频道上可用的新的信道的中心频率和数据率的范围：
 
 |Size(bytes)|1|3|1|
 |:-:|:-:|:-:|:-:|
 |NewChannelReq Payload|ChIndex|Freq|DrRange|
 
 
-- 信道索引(**ChIndex**)是正在创建或修改的信道的索引值。根据所使用的区域和频带，该LoRaWAN规范规定默认频道必须是共同的所有的设备和不能被 ***NewChannelReq*** 命令（参照第6章）进行修改。如果缺省信道的数目是N，则缺省信道从0到N-1，并且 **ChIndex** 合适的范围是N至15.一种设备必须能够处理至少16个不同的信道的定义。在某些区域中的设备可具有存储16个以上的信道的定义。
+- 信道索引(**ChIndex**)是正在创建或修改的信道的索引值。根据所使用的区域和频带，该LoRaWAN规范规定默认频道必须是共同的所有的设备和不能被 **NewChannelReq** 命令（参照第6章）进行修改。如果缺省信道的数目是N，则缺省信道从0到N-1，并且 **ChIndex** 合适的范围是N至15.一种设备必须能够处理至少16个不同的信道的定义。在某些区域中的设备可具有存储16个以上的信道的定义。
 - 频率(**Freq**)字段是一个24位无符号整数。这个实际信道频率为100 × **Freq** Hz，由此表示低于100 MHz的频率值被保留供将来使用。这使得在任何信道设置频率在100MHz至1.67GHz之间每100Hz为一个步进。信道的 **Freq** 值不能为0。终端设备能否检查它的实际频率由无线硬件决定否则将返回一个错误。
 - 数据速率范围(**DrRange**)字段指定此通道允许的数据速率范围。该字段由两个4位的索引组成：
 
@@ -366,7 +366,7 @@ MAC 命令表 **CID**看后八位。
 
 - 继第5.2节的最低数据速率(**MinDR**)子定义的约定指定了该信道上的最低数据速率。举个例子：0 指定 DR0 / 125kHz。类似地，最大数据速率(**MaxDR**)指定了最高数据速率。举个例子：DrRange = 0x77 意味着信道上只有50kbps的GFSK是允许的，DrRange = 0x50 意味着能支持的数据速率范围是 DR0 / 125kHz ~ DR5 / 125kHz。
 - 新定义的信道被使能，则可以立即使用该信道。
-- 终端设备通过发送回一个 ***NewChannelAns*** 命令确认***NewChannelAns*** 命令的接收。此消息的有效载荷包含以下信息：
+- 终端设备通过发送回一个 **NewChannelAns** 命令确认**NewChannelAns** 命令的接收。此消息的有效载荷包含以下信息：
 
 |Size(bytes)|1|
 |:-:|:-:|
@@ -385,7 +385,7 @@ MAC 命令表 **CID**看后八位。
 - 如果这2个位中的任何一个为0，则该命令没有成功，新的信道没有创建。
 
 ### **Setting delay between TX and RX**(RXTimingSetupReq, RXTimingSetupAns)
-- ***RXTimingSetupReq*** 命令允许配置 TX uplink 和 打开第一接收窗口时隙间的延迟(Delay)。在第一接收窗口时隙打开一秒之后第二接收窗口时隙才打开。
+- **RXTimingSetupReq** 命令允许配置 TX uplink 和 打开第一接收窗口时隙间的延迟(Delay)。在第一接收窗口时隙打开一秒之后第二接收窗口时隙才打开。
 
 |Size(bytes)|1|
 |:-:|:-:|
@@ -411,7 +411,7 @@ MAC 命令表 **CID**看后八位。
 |15|15|
 
 
-- 一个终端设备用 ***RXTimingSetupAns*** 来应答 ***RXTimingSetupReq*** 命令,***RXTimingSetupAns***命令没有payload。
+- 一个终端设备用 **RXTimingSetupAns** 来应答 **RXTimingSetupReq** 命令,**RXTimingSetupAns**命令没有payload。
 
 
 ----------
